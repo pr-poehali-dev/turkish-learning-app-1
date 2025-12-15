@@ -6,10 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Index = () => {
   const [activeLesson, setActiveLesson] = useState<number | null>(null);
   const [currentDialogStep, setCurrentDialogStep] = useState(0);
+  const [showAchievementDialog, setShowAchievementDialog] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
 
   const grammarLessons = [
     {
@@ -105,7 +108,76 @@ const Index = () => {
     totalLessons: 3,
     wordsLearned: 45,
     streak: 7,
-    level: 'A1'
+    level: 'A1',
+    totalPoints: 385
+  };
+
+  const achievements = [
+    {
+      id: 1,
+      title: 'Первые шаги',
+      description: 'Завершите первый урок',
+      icon: '🎯',
+      unlocked: true,
+      progress: 100,
+      reward: 50,
+      date: '12.12.2024'
+    },
+    {
+      id: 2,
+      title: 'Неделя силы',
+      description: 'Занимайтесь 7 дней подряд',
+      icon: '🔥',
+      unlocked: true,
+      progress: 100,
+      reward: 100,
+      date: '15.12.2024'
+    },
+    {
+      id: 3,
+      title: 'Словарный запас',
+      description: 'Выучите 50 слов',
+      icon: '📚',
+      unlocked: false,
+      progress: 90,
+      reward: 75,
+      date: null
+    },
+    {
+      id: 4,
+      title: 'Мастер грамматики',
+      description: 'Пройдите все уроки грамматики',
+      icon: '⭐',
+      unlocked: false,
+      progress: 33,
+      reward: 150,
+      date: null
+    },
+    {
+      id: 5,
+      title: 'Разговорчивый',
+      description: 'Завершите 10 диалогов',
+      icon: '💬',
+      unlocked: false,
+      progress: 20,
+      reward: 80,
+      date: null
+    },
+    {
+      id: 6,
+      title: 'Читатель',
+      description: 'Прочитайте 5 текстов',
+      icon: '📖',
+      unlocked: false,
+      progress: 40,
+      reward: 60,
+      date: null
+    }
+  ];
+
+  const handleAchievementClick = (achievement: any) => {
+    setSelectedAchievement(achievement);
+    setShowAchievementDialog(true);
   };
 
   return (
@@ -173,7 +245,7 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="grammar" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 h-auto">
+          <TabsList className="grid w-full grid-cols-5 mb-8 h-auto">
             <TabsTrigger value="grammar" className="flex items-center gap-2 py-3">
               <Icon name="BookText" size={18} />
               <span className="hidden sm:inline">Грамматика</span>
@@ -189,6 +261,10 @@ const Index = () => {
             <TabsTrigger value="quiz" className="flex items-center gap-2 py-3">
               <Icon name="ClipboardCheck" size={18} />
               <span className="hidden sm:inline">Тесты</span>
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center gap-2 py-3">
+              <Icon name="Trophy" size={18} />
+              <span className="hidden sm:inline">Награды</span>
             </TabsTrigger>
           </TabsList>
 
@@ -381,8 +457,147 @@ const Index = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="achievements" className="animate-fade-in">
+            <div className="mb-6">
+              <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-2 border-primary/20">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl flex items-center gap-2">
+                        <Icon name="Award" className="text-primary" size={28} />
+                        Мои достижения
+                      </CardTitle>
+                      <CardDescription className="text-base mt-2">
+                        Всего очков: <span className="font-bold text-primary">{userProgress.totalPoints}</span>
+                      </CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-4xl font-bold text-secondary">
+                        {achievements.filter(a => a.unlocked).length}/{achievements.length}
+                      </div>
+                      <p className="text-sm text-muted-foreground">Разблокировано</p>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {achievements.map((achievement) => (
+                <Card
+                  key={achievement.id}
+                  className={`cursor-pointer transition-all hover:scale-105 ${
+                    achievement.unlocked
+                      ? 'bg-gradient-to-br from-white to-primary/5 border-primary/30 shadow-lg'
+                      : 'opacity-60 hover:opacity-80'
+                  }`}
+                  onClick={() => handleAchievementClick(achievement)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start gap-4">
+                      <div className={`text-5xl ${achievement.unlocked ? 'scale-110' : 'grayscale'}`}>
+                        {achievement.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <CardTitle className="text-lg">{achievement.title}</CardTitle>
+                          {achievement.unlocked && (
+                            <Badge variant="secondary" className="ml-2">
+                              <Icon name="Check" size={12} className="mr-1" />
+                              Получено
+                            </Badge>
+                          )}
+                        </div>
+                        <CardDescription className="text-sm">
+                          {achievement.description}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between text-xs mb-2">
+                          <span className="text-muted-foreground">Прогресс</span>
+                          <span className="font-bold">{achievement.progress}%</span>
+                        </div>
+                        <Progress value={achievement.progress} className="h-2" />
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex items-center gap-1 text-sm">
+                          <Icon name="Coins" size={16} className="text-yellow-500" />
+                          <span className="font-bold text-yellow-600">+{achievement.reward}</span>
+                        </div>
+                        {achievement.unlocked && achievement.date && (
+                          <span className="text-xs text-muted-foreground">{achievement.date}</span>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
+
+      <Dialog open={showAchievementDialog} onOpenChange={setShowAchievementDialog}>
+        <DialogContent className="sm:max-w-md">
+          {selectedAchievement && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="text-7xl animate-bounce">
+                    {selectedAchievement.icon}
+                  </div>
+                  <DialogTitle className="text-2xl">
+                    {selectedAchievement.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-base">
+                    {selectedAchievement.description}
+                  </DialogDescription>
+                </div>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="bg-muted rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Прогресс</span>
+                    <span className="text-sm font-bold">{selectedAchievement.progress}%</span>
+                  </div>
+                  <Progress value={selectedAchievement.progress} className="h-2" />
+                </div>
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border-2 border-yellow-200">
+                  <div className="flex items-center justify-center gap-2">
+                    <Icon name="Coins" size={24} className="text-yellow-600" />
+                    <span className="text-xl font-bold text-yellow-700">
+                      +{selectedAchievement.reward} очков
+                    </span>
+                  </div>
+                </div>
+                {selectedAchievement.unlocked ? (
+                  <div className="text-center">
+                    <Badge variant="secondary" className="text-base px-6 py-2">
+                      <Icon name="CheckCircle" size={16} className="mr-2" />
+                      Разблокировано {selectedAchievement.date}
+                    </Badge>
+                  </div>
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground">
+                    Продолжай заниматься, чтобы разблокировать!
+                  </div>
+                )}
+                <Button
+                  className="w-full"
+                  onClick={() => setShowAchievementDialog(false)}
+                >
+                  Закрыть
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
